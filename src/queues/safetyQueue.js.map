@@ -1,1 +1,0 @@
-{"version":3,"file":"safetyQueue.js","sourceRoot":"","sources":["safetyQueue.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,KAAK,EAAE,MAAM,QAAQ,CAAA;AAC9B,OAAO,EAAE,eAAe,EAAE,MAAM,iBAAiB,CAAA;AAEjD,MAAM,CAAC,MAAM,WAAW,GAAG,IAAI,KAAK,CAAC,cAAc,EAAE;IACjD,UAAU,EAAE,eAAe;CAC9B,CAAC,CAAA"}

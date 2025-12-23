@@ -49,6 +49,7 @@ export const startWalk = async (req: Request, res: Response) => {
         res.status(201).json({ message: 'Walk started', sessionId: session.id });
     } catch (error) {
         res.status(500).json({ error: 'Failed to start walk' });
+        console.error(error) 
     }
 }
 
