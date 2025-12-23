@@ -27,17 +27,14 @@ services:
   api:
     build: .
     container_name: safewalk_api
+    env_file:
+      - .env  # This automatically loads HOST, PORT, USER, PASS, etc.
     ports:
       - "5000:5000"
     environment:
-      # NOTE: We use the SERVICE NAMES 'db' and 'redis' instead of 'localhost'
       - DATABASE_URL=postgresql://safeuser:safepassword@db:5432/safewalk_db?schema=public
       - REDIS_URL=redis://redis:6379
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASS=${SMTP_PASS}
-      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       - db
       - redis
