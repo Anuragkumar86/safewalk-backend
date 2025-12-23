@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # 1. The Postgres Database
+  db:
+    image: postgres:15
+    container_name: safewalk_db
+    restart: always
+    environment:
+      POSTGRES_USER: safeuser
+      POSTGRES_PASSWORD: safepassword
+      POSTGRES_DB: safewalk_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. The Redis Instance (For BullMQ & Sockets)
+  redis:
+    image: redis:7-alpine
+    container_name: safewalk_redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  # 3. Your Express App (API & Workers)
+  api:
+    build: .
+    container_name: safewalk_api
+    ports:
+      - "5000:5000"
+    environment:
+      # NOTE: We use the SERVICE NAMES 'db' and 'redis' instead of 'localhost'
+      - DATABASE_URL=postgresql://safeuser:safepassword@db:5432/safewalk_db?schema=public
+      - REDIS_URL=redis://redis:6379
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - FRONTEND_URL=${FRONTEND_URL}
+    depends_on:
+      - db
+      - redis
+
+volumes:
+  postgres_data:
