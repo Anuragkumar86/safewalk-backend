@@ -73,3 +73,33 @@ export const sendEmergencyEmail = async (
     throw error; // Throw so worker knows it failed
   }
 };
+
+
+
+
+// Add this to your existing lib/mail.ts
+export const sendResetPasswordEmail = async (
+  email: string,
+  userName: string,
+  token: string
+) => {
+  const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
+  const resetUrl = `${baseUrl}/reset-password?token=${token}`;
+
+  const mailOptions = {
+    from: `"Safe-Walk-Buddy" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: `Password Reset Request`,
+    html: `
+      <div style="font-family: sans-serif; max-width: 500px; margin: auto; border: 1px solid #eee; padding: 20px; border-radius: 15px;">
+        <h2 style="color: #1f2937;">Password Reset</h2>
+        <p>Hi ${userName},</p>
+        <p>You requested a password reset. Click the button below to set a new password. This link expires in 1 hour.</p>
+        <a href="${resetUrl}" style="display: inline-block; padding: 12px 25px; background-color: #e11d48; color: white; text-decoration: none; border-radius: 10px; font-weight: bold;">Reset Password</a>
+        <p style="margin-top: 20px; color: #6b7280; font-size: 12px;">If you didn't request this, you can safely ignore this email.</p>
+      </div>
+    `,
+  };
+
+  await transporter.sendMail(mailOptions);
+};

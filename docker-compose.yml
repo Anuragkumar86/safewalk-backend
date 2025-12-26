@@ -27,6 +27,7 @@ services:
   api:
     build: .
     container_name: safewalk_api
+    restart: always
     env_file:
       - .env  # This automatically loads HOST, PORT, USER, PASS, etc.
     ports:

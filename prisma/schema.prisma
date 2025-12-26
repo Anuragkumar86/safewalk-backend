@@ -14,33 +14,36 @@ datasource db {
 }
 
 model User {
-  id                String             @id @default(uuid())
-  email             String             @unique
-  password          String
-  name              String
-  phoneNumber       String?
-  contacts          EmergencyContact[]
-  walkSessions      WalkSession[]
-  createdAt         DateTime           @default(now())
+  id           String             @id @default(uuid())
+  email        String             @unique
+  password     String
+  name         String
+  phoneNumber  String?
+  contacts     EmergencyContact[]
+  walkSessions WalkSession[]
+  createdAt    DateTime           @default(now())
+  // models/User.js (Example)
+  resetPasswordToken String?
+  resetPasswordExpires DateTime?
 }
 
 model EmergencyContact {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   email       String
   phoneNumber String?
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
+  user        User    @relation(fields: [userId], references: [id])
 }
 
 model WalkSession {
-  id             String    @id @default(uuid())
-  status         String    @default("ACTIVE") // ACTIVE, SAFE, DANGER
-  startTime      DateTime  @default(now())
-  endTime        DateTime?
-  lastKnownLat   Float?
-  lastKnownLng   Float?
-  bullMqJobId    String
-  userId         String
-  user           User      @relation(fields: [userId], references: [id])
+  id           String    @id @default(uuid())
+  status       String    @default("ACTIVE") // ACTIVE, SAFE, DANGER
+  startTime    DateTime  @default(now())
+  endTime      DateTime?
+  lastKnownLat Float?
+  lastKnownLng Float?
+  bullMqJobId  String?
+  userId       String
+  user         User      @relation(fields: [userId], references: [id])
 }
