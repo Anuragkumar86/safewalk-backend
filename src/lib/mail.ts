@@ -18,11 +18,12 @@ export const sendEmergencyEmail = async (
   userName: string, 
   lat: number | null, 
   lng: number | null,
-  sessionId: string // Added this parameter
+  sessionId: string
 ) => {
-  // Your Frontend URL (e.g., http://localhost:3000)
   const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-  const liveTrackingUrl = `${baseUrl}/track/${sessionId}`;
+  
+  // FIX: Change URL to use the query parameter "?id=" so your TrackerContent can find it
+  const liveTrackingUrl = `${baseUrl}/track?id=${sessionId}`;
   
   const googleMapsUrl = (lat && lng) 
     ? `https://www.google.com/maps?q=${lat},${lng}` 
@@ -33,32 +34,34 @@ export const sendEmergencyEmail = async (
     to: contactEmail,
     subject: `🚨 URGENT: Safety Alert for ${userName}`,
     html: `
-      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; border: 2px solid #e11d48; padding: 0; border-radius: 16px; max-width: 500px; overflow: hidden; color: #1f2937;">
+      <div style="font-family: Arial, sans-serif; border: 2px solid #e11d48; padding: 0; border-radius: 16px; max-width: 500px; overflow: hidden; color: #1f2937; margin: auto;">
         <div style="background-color: #e11d48; color: white; padding: 20px; text-align: center;">
           <h1 style="margin: 0; font-size: 24px;">EMERGENCY ALERT</h1>
         </div>
         
         <div style="padding: 25px;">
-          <p style="font-size: 16px; line-height: 1.5;">Your emergency contact, <strong>${userName}</strong>, failed to check in safely from their walk.</p>
+          <p style="font-size: 16px; line-height: 1.5;">Your emergency contact, <strong>${userName}</strong>, failed to check in safely.</p>
           
           <div style="background-color: #fef2f2; border-radius: 12px; padding: 15px; margin: 20px 0; border: 1px solid #fee2e2;">
             <p style="margin: 0; color: #991b1b; font-weight: bold; font-size: 14px;">ACTION REQUIRED:</p>
-            <p style="margin: 5px 0 0 0; font-size: 14px;">Please check the live location below or try contacting them immediately.</p>
+            <p style="margin: 5px 0 0 0; font-size: 14px;">Please check their live location or contact them immediately.</p>
           </div>
 
-          <a href="${liveTrackingUrl}" target="_blank" style="display: block; text-align: center; padding: 16px; background: #e11d48; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 18px; margin-bottom: 15px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-            📍 View Live Tracking Map
+          <!-- PRIMARY ACTION: YOUR WEBSITE -->
+          <a href="${liveTrackingUrl}" target="_blank" style="display: block; text-align: center; padding: 16px; background: #e11d48; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-bottom: 12px;">
+            🌐 View on SafeWalk Website
           </a>
 
+          <!-- SECONDARY ACTION: GOOGLE MAPS -->
           ${googleMapsUrl ? `
-          <a href="${googleMapsUrl}" target="_blank" style="display: block; text-align: center; color: #4b5563; text-decoration: underline; font-size: 14px;">
-            Open backup in Google Maps
+          <a href="${googleMapsUrl}" target="_blank" style="display: block; text-align: center; padding: 16px; background: #2563eb; color: white; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+            📍 Open in Google Maps
           </a>` : ''}
 
           <hr style="border: 0; border-top: 1px solid #eee; margin: 25px 0;" />
           <p style="font-size: 11px; color: #9ca3af; text-align: center;">
             Session ID: ${sessionId}<br/>
-            Coordinates: ${lat || 'Unknown'}, ${lng || 'Unknown'}
+            Last Coordinates: ${lat || 'Unknown'}, ${lng || 'Unknown'}
           </p>
         </div>
       </div>
@@ -69,8 +72,8 @@ export const sendEmergencyEmail = async (
     await transporter.sendMail(mailOptions);
     console.log(`✅ Emergency alert sent to: ${contactEmail}`);
   } catch (error) {
-    console.error(`❌ Email sending failed for ${contactEmail}:`, error);
-    throw error; // Throw so worker knows it failed
+    console.error(`❌ Email sending failed:`, error);
+    throw error;
   }
 };
 
