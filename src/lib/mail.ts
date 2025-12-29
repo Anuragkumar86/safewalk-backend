@@ -23,7 +23,7 @@ export const sendEmergencyEmail = async (
   const baseUrl = process.env.FRONTEND_URL || "http://localhost:3000";
   
   // FIX: Change URL to use the query parameter "?id=" so your TrackerContent can find it
-  const liveTrackingUrl = `${baseUrl}/track?id=${sessionId}`;
+  const liveTrackingUrl = `${baseUrl}/track/tracker/?id=${sessionId}`;
   
   const googleMapsUrl = (lat && lng) 
     ? `https://www.google.com/maps?q=${lat},${lng}` 
