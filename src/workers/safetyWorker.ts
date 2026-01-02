@@ -8,6 +8,8 @@ export const safetyWorker = new Worker(
   "safety-timer",
   async (job) => {
     const { sessionId } = job.data;
+    // console.log("🟡 Worker executing job:", job.id);
+
 
     const session = await prisma.walkSession.findUnique({
       where: { id: sessionId },
