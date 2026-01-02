@@ -4,54 +4,44 @@ import { safetyQueue } from "../queues/safetyQueue.js";
 
 
 export const startWalk = async (req: Request, res: Response) => {
-
     try {
-        const userId = req.user.id
+        const userId = req.user.id;
         const { durationMinutes, startLat, startLon } = req.body;
 
-        if (
-            userId === undefined ||
-            durationMinutes === undefined ||
-            startLat === undefined ||
-            startLon === undefined
-        ) {
-            return res.status(400).json({ // Use 400 for Bad Request
-                message: "All fields required",
-                received: { userId, durationMinutes, startLat, startLon } // Useful for debugging
-            });
+        if (!userId || !durationMinutes || startLat === undefined || startLon === undefined) {
+            return res.status(400).json({ message: "All fields required" });
         }
 
         const session = await prisma.walkSession.create({
             data: {
-                userId: userId,
+                userId,
                 lastKnownLat: startLat,
                 lastKnownLng: startLon,
                 status: "ACTIVE"
             }
-        })
+        });
 
         const delay = durationMinutes * 60 * 1000;
 
-        const job = await safetyQueue.add("safety-check",
+        // Using jobId: session.id prevents duplicate jobs for the same session
+        const job = await safetyQueue.add(
+            "safety-check",
             { sessionId: session.id, userId },
-            { delay }
-
-        )
-        console.log("New job added with ID: ", job.id)
+            { delay, jobId: session.id } 
+        );
 
         await prisma.walkSession.update({
             where: { id: session.id },
-            data: {
-                bullMqJobId: job.id!
-            }
-        })
-        console.log(`Walk started with session ID: ${session.id}`)
+            data: { bullMqJobId: job.id }
+        });
+
+        console.log(`🚀 Walk started. Job ${job.id} queued for ${durationMinutes}m`);
         res.status(201).json({ message: 'Walk started', sessionId: session.id });
     } catch (error) {
-        console.error("DETAILED START WALK ERROR:", error); // THIS IS CRUCIAL
-        return res.status(500).json({ error: "Failed to start walk" }); 
+        console.error("START WALK ERROR:", error);
+        res.status(500).json({ error: "Failed to start walk" });
     }
-}
+};
 
 
 export const markSafe = async (req: Request, res: Response) => {

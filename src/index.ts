@@ -1,6 +1,6 @@
 
 import "dotenv/config"
-import './workers/safetyWorker.js'; 
+
 import express, { type Request } from "express"
 import cors from "cors"
 import http from "http"
