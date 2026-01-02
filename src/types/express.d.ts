@@ -10,4 +10,12 @@ declare global {
   }
 }
 
+declare global {
+  namespace Express {
+    interface Request {
+      io: Server;
+    }
+  }
+}
+
 export {};
