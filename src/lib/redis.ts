@@ -1,15 +1,26 @@
-import { Redis } from "ioredis"
+import { Redis } from "ioredis";
 
-// This logic allows it to work BOTH locally and on AWS/Docker
+// Use the environment variable, or fallback to local redis
 const connectionString = process.env.REDIS_URL || "redis://redis:6379";
+
+// Check if the URL starts with 'rediss://' (Upstash/Production requires this)
+const isTls = connectionString.startsWith("rediss://");
 
 export const redisConnection = new Redis(connectionString, {
     maxRetriesPerRequest: null,
-    // Add this to see connection errors in your 'docker logs'
+    
+    // CRITICAL: Upstash requires TLS (SSL) to be active
+    // We only enable it if the connection string starts with 'rediss'
+    tls: isTls ? {
+        rejectUnauthorized: false // Necessary for many cloud Redis providers
+    } : undefined,
+
     retryStrategy(times) {
+        // Progressive backoff: wait longer between each failed attempt
         const delay = Math.min(times * 50, 2000);
         return delay;
     }
-})
+});
 
-redisConnection.on("error", (err) => console.error("Redis Connection Error:", err));
+redisConnection.on("connect", () => console.log("✅ Redis Connected Successfully"));
+redisConnection.on("error", (err) => console.error("❌ Redis Connection Error:", err));
